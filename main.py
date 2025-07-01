@@ -6,20 +6,17 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 TOKEN = os.getenv("TOKEN")
 WEATHER_API = os.getenv("WEATHER_API")
 FLIGHTS_API = os.getenv("FLIGHTS_API")
-TOMTOM_API = os.getenv("TOMTOM_API")
 
-# /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "🌍 Bienvenido a FARIEBOT_GLOBAL_24_7\n"
         "Comandos disponibles:\n"
         "/clima <ciudad>\n"
         "/vuelos <origen> <destino>\n"
-        "/tráfico <ciudad>\n"
+        "/trafico <ciudad>\n"
         "/radar"
     )
 
-# /clima
 async def clima(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
         await update.message.reply_text("🌦 Indica una ciudad. Ej: /clima Bogotá")
@@ -34,7 +31,6 @@ async def clima(update: Update, context: ContextTypes.DEFAULT_TYPE):
         temp = res["main"]["temp"]
         await update.message.reply_text(f"🌦 Clima en {ciudad}: {desc}, {temp}°C")
 
-# /vuelos
 async def vuelos(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if len(context.args) < 2:
         await update.message.reply_text("✈️ Indica origen y destino. Ej: /vuelos BOG MIA")
@@ -52,24 +48,18 @@ async def vuelos(update: Update, context: ContextTypes.DEFAULT_TYPE):
         status = vuelo["flight_status"]
         await update.message.reply_text(f"✈️ Vuelo {flight_iata} de {airline}\nEstado: {status.capitalize()}")
 
-# /tráfico
 async def trafico(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not context.args:
-        await update.message.reply_text("🚦 Indica una ciudad. Ej: /tráfico Bogotá")
-        return
-    ciudad = ' '.join(context.args)
-    await update.message.reply_text(f"🚦 Tráfico en {ciudad}: (Pronto datos en tiempo real TomTom/Google)")
+    await update.message.reply_text("🚦 Módulo de tráfico: en desarrollo.")
 
-# /radar
 async def radar(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("🛰 Radar global: (Pronto conexión con NOAA/OpenSky)")
+    await update.message.reply_text("🛰 Módulo de radar global: en desarrollo.")
 
 def main():
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("clima", clima))
     app.add_handler(CommandHandler("vuelos", vuelos))
-    app.add_handler(CommandHandler("tráfico", trafico))
+    app.add_handler(CommandHandler("trafico", trafico))
     app.add_handler(CommandHandler("radar", radar))
     app.run_polling()
 

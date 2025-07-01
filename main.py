@@ -1,13 +1,11 @@
-import os
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+import os
 import requests
 
-# ✅ Cargar tokens desde variables de entorno
 TOKEN = os.getenv("TOKEN")
 OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
 
-# ✅ Comando /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "¡Hola! Soy FARIEBOT GLOBAL 24/7.\n"
@@ -18,41 +16,29 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/radar - Información de radar"
     )
 
-# ✅ Comando /clima
 async def clima(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if len(context.args) == 0:
-        await update.message.reply_text("Por favor escribe /clima <ciudad>")
+        await update.message.reply_text("Por favor proporciona una ciudad. Ejemplo: /clima Bogotá")
         return
-    ciudad = " ".join(context.args)
-    try:
-        response = requests.get(
-            f"http://api.openweathermap.org/data/2.5/weather?q={ciudad}&appid={OPENWEATHER_API_KEY}&lang=es&units=metric"
-        )
-        data = response.json()
-        if response.status_code == 200:
-            weather = data["weather"][0]["description"]
-            temp = data["main"]["temp"]
-            await update.message.reply_text(
-                f"Clima en {ciudad}: {weather}, temperatura: {temp}°C"
-            )
-        else:
-            await update.message.reply_text(f"No pude obtener el clima de {ciudad}.")
-    except Exception as e:
-        await update.message.reply_text(f"Error al consultar clima: {e}")
+    ciudad = ' '.join(context.args)
+    url = f"http://api.openweathermap.org/data/2.5/weather?q={ciudad}&appid={OPENWEATHER_API_KEY}&units=metric&lang=es"
+    response = requests.get(url).json()
+    if response.get("cod") != 200:
+        await update.message.reply_text(f"Ciudad no encontrada: {ciudad}")
+        return
+    clima_info = response["weather"][0]["description"]
+    temperatura = response["main"]["temp"]
+    await update.message.reply_text(f"Clima en {ciudad}: {clima_info}, {temperatura}°C")
 
-# ✅ Comando /trafico
 async def trafico(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Información de tráfico: [Aquí integrarías la API real].")
+    await update.message.reply_text("Información de tráfico: [Aquí integras la API real].")
 
-# ✅ Comando /vuelos
 async def vuelos(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Información de vuelos: [Aquí integrarías la API real].")
+    await update.message.reply_text("Información de vuelos: [Aquí integras la API real].")
 
-# ✅ Comando /radar
 async def radar(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Información de radar: [Aquí integrarías la API real].")
+    await update.message.reply_text("Información de radar: [Aquí integras la API real].")
 
-# ✅ Configuración de la aplicación
 def main():
     app = ApplicationBuilder().token(TOKEN).build()
 

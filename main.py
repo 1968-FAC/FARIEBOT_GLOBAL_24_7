@@ -1,48 +1,41 @@
 import os
 from telegram import Update
-from telegram.ext import (
-    ApplicationBuilder, CommandHandler, ContextTypes
-)
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+import requests
 from dotenv import load_dotenv
 
 # Cargar variables de entorno
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
+OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
 
-# --- Comandos ---
+# Comando /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "¡Hola! Soy FARIEBOT GLOBAL 24/7.\n"
+        "🚀 FARIEBOT GLOBAL 24/7 activo.\n"
         "Comandos disponibles:\n"
         "/clima <ciudad> - Consulta el clima\n"
-        "/trafico - Consulta el tráfico\n"
-        "/vuelos - Consulta vuelos\n"
-        "/radar - Información de radar"
     )
 
+# Comando /clima
 async def clima(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Información de clima: [Aquí integras la API real].")
+    if not context.args:
+        await update.message.reply_text("Por favor indica una ciudad. Ejemplo: /clima Bogotá")
+        return
+    ciudad = " ".join(context.args)
+    url = f"http://api.openweathermap.org/data/2.5/weather?q={ciudad}&appid={OPENWEATHER_API_KEY}&units=metric&lang=es"
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        clima_text = f"🌡 {data['main']['temp']}°C, {data['weather'][0]['description'].capitalize()}"
+        await update.message.reply_text(f"Clima en {ciudad}: {clima_text}")
+    else:
+        await update.message.reply_text("No se pudo obtener el clima. Verifica la ciudad.")
 
-async def trafico(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Información de tráfico: [Aquí integras la API real].")
-
-async def vuelos(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Información de vuelos: [Aquí integras la API real].")
-
-async def radar(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Información de radar: [Aquí integras la API real].")
-
-# --- Main ---
-def main():
-    application = ApplicationBuilder().token(TOKEN).build()
-
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("clima", clima))
-    application.add_handler(CommandHandler("trafico", trafico))
-    application.add_handler(CommandHandler("vuelos", vuelos))
-    application.add_handler(CommandHandler("radar", radar))
-
-    application.run_polling()
+# Crear app
+app = ApplicationBuilder().token(TOKEN).build()
+app.add_handler(CommandHandler("start", start))
+app.add_handler(CommandHandler("clima", clima))
 
 if __name__ == "__main__":
-    main()
+    app.run_polling()

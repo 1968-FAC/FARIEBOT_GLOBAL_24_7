@@ -1,55 +1,56 @@
 import os
-import logging
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+from dotenv import load_dotenv
 
-# Configuración de logs
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-
-# Variables de entorno
+# Cargar las variables de entorno
+load_dotenv()
 TOKEN = os.getenv("TOKEN")
-OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
-# Agrega aquí el resto si quieres usarlos
 
+# Crear la aplicación
+app = ApplicationBuilder().token(TOKEN).build()
+
+# Comando /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    msg = (
-        "¡Hola! Soy FARIEBOT GLOBAL 24/7.\n"
-        "Comandos disponibles:\n"
+    await update.message.reply_text(
+        "¡Hola! Soy FARIEBOT GLOBAL 24/7.\nComandos disponibles:\n"
         "/clima <ciudad> - Consulta el clima\n"
         "/trafico - Consulta el tráfico\n"
         "/vuelos - Consulta vuelos\n"
         "/radar - Información de radar"
     )
-    await update.message.reply_text(msg)
 
+# Comando /clima
 async def clima(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not context.args:
+    if len(context.args) == 0:
         await update.message.reply_text("Por favor proporciona una ciudad. Ejemplo: /clima Bogotá")
         return
-    ciudad = ' '.join(context.args)
-    # Aquí puedes integrar la API real (ejemplo con OpenWeather)
-    await update.message.reply_text(f"Información de clima para {ciudad}: [Aquí integras la API real]")
+    ciudad = " ".join(context.args)
+    # Aquí integrarías la API real de clima
+    await update.message.reply_text(f"Información de clima para {ciudad}: [Aquí integrarías la API real]")
 
+# Comando /trafico
 async def trafico(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Información de tráfico: [Aquí integras la API real]")
+    # Aquí integrarías la API real de tráfico
+    await update.message.reply_text("Información de tráfico: [Aquí integrarías la API real]")
 
+# Comando /vuelos
 async def vuelos(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Información de vuelos: [Aquí integras la API real]")
+    # Aquí integrarías la API real de vuelos
+    await update.message.reply_text("Información de vuelos: [Aquí integrarías la API real]")
 
+# Comando /radar
 async def radar(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Información de radar: [Aquí integras la API real]")
+    # Aquí integrarías la API real de radar
+    await update.message.reply_text("Información de radar: [Aquí integrarías la API real]")
 
-def main():
-    app = ApplicationBuilder().token(TOKEN).build()
+# Registrar los handlers
+app.add_handler(CommandHandler("start", start))
+app.add_handler(CommandHandler("clima", clima))
+app.add_handler(CommandHandler("trafico", trafico))
+app.add_handler(CommandHandler("vuelos", vuelos))
+app.add_handler(CommandHandler("radar", radar))
 
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("clima", clima))
-    app.add_handler(CommandHandler("trafico", trafico))
-    app.add_handler(CommandHandler("vuelos", vuelos))
-    app.add_handler(CommandHandler("radar", radar))
-
-    logging.info("BOT INICIADO 🚀")
+# Iniciar polling
+if __name__ == "__main__":
     app.run_polling()
-
-if __name__ == '__main__':
-    main()

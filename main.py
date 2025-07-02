@@ -1,23 +1,20 @@
 import os
+import requests
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
-import requests
-from dotenv import load_dotenv
 
-# Cargar variables de entorno
-load_dotenv()
 TOKEN = os.getenv("TOKEN")
 OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
 
-# Comando /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "🚀 FARIEBOT GLOBAL 24/7 activo.\n"
         "Comandos disponibles:\n"
-        "/clima <ciudad> - Consulta el clima\n"
+        "/clima <ciudad> - Clima en tiempo real\n"
+        "/vuelos - Consulta vuelos (próximamente)\n"
+        "/trafico - Tráfico en tu zona (próximamente)"
     )
 
-# Comando /clima
 async def clima(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
         await update.message.reply_text("Por favor indica una ciudad. Ejemplo: /clima Bogotá")
@@ -32,10 +29,11 @@ async def clima(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("No se pudo obtener el clima. Verifica la ciudad.")
 
-# Crear app
-app = ApplicationBuilder().token(TOKEN).build()
-app.add_handler(CommandHandler("start", start))
-app.add_handler(CommandHandler("clima", clima))
+def main():
+    app = ApplicationBuilder().token(TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("clima", clima))
+    app.run_polling()
 
 if __name__ == "__main__":
-    app.run_polling()
+    main()

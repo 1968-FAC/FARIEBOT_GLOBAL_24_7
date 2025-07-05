@@ -7,13 +7,18 @@ load_dotenv()
 TOKEN = os.getenv("TOKEN")
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("¡Estoy VIVO! 💪 Funciona polling, PTB 20.x y el TOKEN es correcto.")
+    await update.message.reply_text(
+        "¡Hola! Soy FARIEBOT GLOBAL 24/7. Comandos disponibles:\n"
+        "/clima <ciudad> - Consulta el clima\n"
+        "/trafico - Consulta el tráfico\n"
+        "/vuelos - Consulta vuelos\n"
+        "/radar - Información de radar"
+    )
 
 def main():
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
-    print("Bot corriendo y esperando mensajes...")
     app.run_polling()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

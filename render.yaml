@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: fariebot-global
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python main.py"
+    envVars:
+      - key: TOKEN
+        sync: false
+      - key: OPENWEATHER_API
+        sync: false
+      - key: FLIGHT_API
+        sync: false
+      - key: TRAFFIC_API
+        sync: false

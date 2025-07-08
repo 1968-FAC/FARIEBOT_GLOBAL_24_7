@@ -1,17 +1,14 @@
 from telegram import InputFile
+from telegram.ext import ContextTypes
 import os
 
-def cargar_imagen(ruta_archivo):
-    if not os.path.isfile(ruta_archivo):
-        raise FileNotFoundError(f"No se encontró el archivo: {ruta_archivo}")
-    return InputFile(open(ruta_archivo, 'rb'))
+def validar_archivo(archivo: InputFile) -> bool:
+    extensiones_validas = ['.jpg', '.jpeg', '.png', '.gif']
+    extension = os.path.splitext(archivo.name)[1].lower()
+    return extension in extensiones_validas
 
-def cargar_documento(ruta_archivo):
-    if not os.path.isfile(ruta_archivo):
-        raise FileNotFoundError(f"No se encontró el archivo: {ruta_archivo}")
-    return InputFile(open(ruta_archivo, 'rb'))
-
-def cargar_audio(ruta_archivo):
-    if not os.path.isfile(ruta_archivo):
-        raise FileNotFoundError(f"No se encontró el archivo: {ruta_archivo}")
-    return InputFile(open(ruta_archivo, 'rb'))
+async def enviar_archivo(bot, chat_id, archivo: InputFile, context: ContextTypes.DEFAULT_TYPE):
+    if validar_archivo(archivo):
+        await bot.send_document(chat_id=chat_id, document=archivo)
+    else:
+        await context.bot.send_message(chat_id=chat_id, text="Archivo no válido. Solo imágenes .jpg, .png, .gif.")

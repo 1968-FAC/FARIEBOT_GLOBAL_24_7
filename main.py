@@ -11,14 +11,13 @@ from dotenv import load_dotenv
 # Carga las variables del entorno
 load_dotenv()
 
-# Llaves del entorno (reemplaza los nombres por los tuyos si es necesario)
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
-WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")
-FLIGHT_API_KEY = os.getenv("FLIGHT_API_KEY")
-TRAFFIC_API_KEY = os.getenv("TRAFFIC_API_KEY")
+WEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
+# Si usas FlightLabs, Amadeus, etc., pon los nombres correctos aquí
+# FLIGHT_API_KEY = os.getenv("FLIGHTLABS_API_KEY")
 
-# ID de tu chat para enviar mensajes automáticos
-CHAT_ID = os.getenv("CHAT_ID")  # Puedes poner tu chat_id directo o gestionarlo dinámicamente
+# Es mejor si pones tu CHAT_ID aquí (ejemplo: CHAT_ID = 123456789)
+CHAT_ID = os.getenv("CHAT_ID")
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -31,7 +30,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Alertas automáticas de vuelos, clima y tráfico. No necesitas hacer nada, ¡te avisaré de todo! 😉"
     )
 
-# Ejemplo de función: Consulta el clima de una ciudad
+# Consulta el clima de una ciudad (modifica city por defecto si quieres)
 async def get_weather_alert():
     city = "Bogota,CO"
     url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={WEATHER_API_KEY}&lang=es&units=metric"
@@ -48,19 +47,18 @@ async def get_weather_alert():
         alert = f"Error en clima: {e}"
     return alert
 
-# Ejemplo de función: Consulta vuelos (simulado para ejemplo)
+# Simulación de alerta de vuelos
 async def get_flight_alert():
-    # Puedes usar tu propia integración real aquí
+    # Aquí puedes integrar con tu API real si quieres
     alert = "✈️ Alerta de vuelos: Vuelo a Cancún 3:30pm, tiquetes con descuento especial. ¡Reserva ya!"
     return alert
 
-# Ejemplo de función: Consulta tráfico (simulado)
+# Simulación de alerta de tráfico
 async def get_traffic_alert():
-    # Puedes usar Google Traffic o Waze si tienes la API
     alert = "🚦 Alerta de tráfico: Tráfico moderado en la vía al aeropuerto. ¡Sal con tiempo!"
     return alert
 
-# Función que envía mensajes automáticos cada cierto tiempo
+# Envío de alertas automáticas
 async def send_alerts(application):
     while True:
         weather = await get_weather_alert()
@@ -71,17 +69,13 @@ async def send_alerts(application):
             await application.bot.send_message(chat_id=CHAT_ID, text=message)
         except Exception as e:
             logging.error(f"Error enviando alerta: {e}")
-        await asyncio.sleep(1800)  # Espera 30 minutos (1800 segundos). Ajusta el tiempo según prefieras
+        await asyncio.sleep(1800)  # 30 minutos
 
 async def main():
     application = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
-
-    # Comandos
     application.add_handler(CommandHandler("start", start))
-
-    # Envía alertas automáticas
+    # Envío de alertas cada 30 min (puedes ajustar el tiempo)
     application.job_queue.run_repeating(lambda _: asyncio.create_task(send_alerts(application)), interval=1800, first=10)
-
     print("Bot corriendo y enviando alertas automáticas.")
     await application.run_polling()
 
